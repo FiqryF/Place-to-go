@@ -104,8 +104,8 @@
       image_url: imageUrl,
       targetDate: row.target_date || row.targetDate || "",
       visitedAt: row.visited_at || row.visitedAt || "",
-      fiqryRating: row.fiqry_rating || row.fiqryRating || "",
-      isyanaRating: row.isyana_rating || row.isyanaRating || "",
+      fiqryRating: row.bf_score || row.fiqry_rating || row.fiqryRating || "",
+      isyanaRating: row.gf_score || row.isyana_rating || row.isyanaRating || "",
       createdAt: row.created_at || row.createdAt || "",
       updatedAt: row.updated_at || row.updatedAt || ""
     };

@@ -10,71 +10,106 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
   </head>
-  <body>
-    <main class="app-shell detail-shell">
-      <nav class="topbar detail-topbar" aria-label="Primary">
+  <body class="add-page">
+    <main class="app-shell add-shell">
+      <nav class="topbar add-topbar" aria-label="Primary">
         <a class="icon-link" href="manage.html" aria-label="Back to manage places">
           <i data-lucide="arrow-left"></i>
-        </a>
-        <a class="brand compact" href="home.html">
-          <span class="brand-mark"><i data-lucide="compass"></i></span>
-          <span>Place To Go</span>
         </a>
       </nav>
 
       <section class="add-hero">
         <p class="eyebrow">User space</p>
-        <h1 id="formTitle">Save a new place for later.</h1>
-        <p class="intro-copy">Upload a photo from your gallery and save the place directly to Supabase.</p>
+        <h1 id="formTitle">Save a new place</h1>
+        <p class="intro-copy">Isi detail tempat dengan rapi, lalu tempel link Google Maps yang sesuai.</p>
       </section>
 
       <section class="status-message" id="addStatus" hidden></section>
 
       <form class="place-form" id="placeForm">
-        <label>
-          <span>Name</span>
-          <input id="nameInput" name="name" type="text" placeholder="Ubud Art Market" required>
-        </label>
-        <label>
-          <span>Location</span>
-          <input id="locationInput" name="location" type="text" placeholder="Ubud, Bali" required>
-        </label>
-        <label>
-          <span>Category</span>
-          <select id="categoryInput" name="category" required>
-            <option value="Beach">Beach</option>
-            <option value="Cafe">Cafe</option>
-            <option value="City Walk">City Walk</option>
-            <option value="Culture">Culture</option>
-            <option value="Food">Food</option>
-            <option value="Nature">Nature</option>
-            <option value="Stay">Stay</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
-        <label>
-          <span>Description</span>
-          <textarea id="descriptionInput" name="description" rows="4" placeholder="A quiet place for a slow morning walk." required></textarea>
-        </label>
-        <label>
-          <span>Google Maps URL</span>
-          <input id="mapsInput" name="maps_url" type="url" placeholder="https://www.google.com/maps/place/..." required>
-        </label>
-        <label>
-          <span>Target date</span>
-          <input id="targetDateInput" name="target_date" type="date">
-        </label>
-        <label>
-          <span>Status</span>
-          <select id="statusInput" name="status" required>
-            <option value="wishlist">Wishlist</option>
-            <option value="visited">Visited</option>
-          </select>
-        </label>
-        <label>
-          <span>Photo</span>
-          <input id="imageInput" name="image" type="file" accept="image/*">
-        </label>
+        <section class="form-panel">
+          <div class="form-section-title">
+            <span><i data-lucide="map-pin"></i></span>
+            <div>
+              <p>Place</p>
+              <h2>Tempatnya apa?</h2>
+            </div>
+          </div>
+
+          <label class="field-control">
+            <span>Name</span>
+            <input id="nameInput" name="name" type="text" placeholder="Ubud Art Market" required>
+          </label>
+
+          <label class="field-control">
+            <span>Category</span>
+            <select id="categoryInput" name="category" required>
+              <option value="Beach">Beach</option>
+              <option value="Cafe">Cafe</option>
+              <option value="City Walk">City Walk</option>
+              <option value="Culture">Culture</option>
+              <option value="Food">Food</option>
+              <option value="Nature">Nature</option>
+              <option value="Stay">Stay</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+
+          <label class="field-control">
+            <span>Description</span>
+            <textarea id="descriptionInput" name="description" rows="4" placeholder="A quiet place for a slow morning walk." required></textarea>
+          </label>
+        </section>
+
+        <section class="form-panel location-input-card" aria-label="Location input">
+          <div class="form-section-title">
+            <span><i data-lucide="navigation"></i></span>
+            <div>
+              <p>Location</p>
+              <h2>Lokasinya dimana?</h2>
+            </div>
+          </div>
+
+          <label class="field-control">
+            <span>Location</span>
+            <input id="locationInput" name="location" type="text" placeholder="Ubud, Bali" required>
+          </label>
+
+          <label class="field-control">
+            <span>Google Maps URL</span>
+            <input id="mapsInput" name="maps_url" type="url" placeholder="https://www.google.com/maps/place/..." required>
+          </label>
+
+          <a class="button secondary maps-check-button" id="previewMapsButton" href="#" target="_blank" rel="noreferrer" aria-disabled="true">
+            <i data-lucide="external-link"></i>
+            <span>Cek link Google Maps</span>
+          </a>
+          <p class="field-help">Buka Google Maps, pilih tempatnya, klik share, lalu paste link di sini.</p>
+        </section>
+
+        <section class="form-panel">
+          <div class="form-section-title">
+            <span><i data-lucide="calendar-heart"></i></span>
+            <div>
+              <p>Plan</p>
+              <h2>Rencana kunjungan</h2>
+            </div>
+          </div>
+
+          <label class="field-control">
+            <span>Status</span>
+            <select id="statusInput" name="status" required>
+              <option value="wishlist">Wishlist</option>
+              <option value="visited">Visited</option>
+            </select>
+          </label>
+
+          <label class="field-control photo-control">
+            <span>Photo</span>
+            <input id="imageInput" name="image" type="file" accept="image/*">
+          </label>
+        </section>
+
         <button class="button primary wide-button" id="savePlaceButton" type="submit">
           <i data-lucide="save"></i>
           <span>Save Place</span>

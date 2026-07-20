@@ -14,12 +14,10 @@
     <main class="app-shell">
       <section class="welcome-screen">
         <div class="welcome-card">
-          <span class="brand-mark welcome-mark"><i data-lucide="compass"></i></span>
           <p class="eyebrow">Place To Go</p>
-          <h1>Hii, kita mau kemana hari ini??</h1>
-          <p>Masuk dulu buat buka wishlist tempat yang pengen kita kunjungi.</p>
-          <a class="button primary wide-button" href="login.html">
-            <i data-lucide="log-in"></i>
+          <h1>Hii, kita mau kemana hari ini?</h1>
+          <p>Masuk dulu untuk membuka wishlist kecil kita, dari tempat impian sampai momen yang nanti jadi cerita.</p>
+          <a class="button primary wide-button welcome-login-button" href="login.html">
             <span>Login</span>
           </a>
         </div>
@@ -29,6 +27,15 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
       if (window.lucide) window.lucide.createIcons();
+
+      const loginLink = document.querySelector(".welcome-login-button");
+      loginLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        document.body.classList.add("page-leaving");
+        window.setTimeout(() => {
+          window.location.href = loginLink.href;
+        }, 260);
+      });
     </script>
   </body>
 </html>

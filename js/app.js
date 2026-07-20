@@ -53,14 +53,14 @@
       state.expanded = true;
       render();
     });
-    els.logout.addEventListener("click", openLogoutDialog);
-    els.cancelLogout.addEventListener("click", closeLogoutDialog);
-    els.confirmLogout.addEventListener("click", logout);
+    if (els.logout) els.logout.addEventListener("click", openLogoutDialog);
+    if (els.cancelLogout) els.cancelLogout.addEventListener("click", closeLogoutDialog);
+    if (els.confirmLogout) els.confirmLogout.addEventListener("click", logout);
     loadPlaces();
   }
 
   function closeMenu() {
-    els.menu.open = false;
+    if (els.menu) els.menu.open = false;
   }
 
   function openLogoutDialog() {

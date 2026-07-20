@@ -13,6 +13,10 @@
     visitFacts: document.getElementById("visitFacts"),
     visitedDate: document.getElementById("detailVisitedDate"),
     ratings: document.getElementById("detailRatings"),
+    bfMoodText: document.getElementById("bfMoodText"),
+    bfMoodScore: document.getElementById("bfMoodScore"),
+    gfMoodText: document.getElementById("gfMoodText"),
+    gfMoodScore: document.getElementById("gfMoodScore"),
     maps: document.getElementById("detailMaps"),
     visited: document.getElementById("detailVisitedButton"),
     visitSheet: document.getElementById("visitSheet"),
@@ -80,10 +84,11 @@
     els.visited.hidden = place.status === "visited";
     closeVisitForm();
 
-    const hasVisitDetails = place.status === "visited" && (place.visitedAt || place.fiqryRating || place.isyanaRating);
-    els.visitFacts.hidden = !hasVisitDetails;
+    els.visitFacts.hidden = false;
     els.visitedDate.textContent = formatDate(place.visitedAt);
-    els.ratings.textContent = formatRatings(place);
+    els.ratings.innerHTML = formatRatings(place);
+    renderMoodChecklist(place);
+    if (window.lucide) window.lucide.createIcons();
   }
 
   function openVisitForm() {
@@ -159,7 +164,7 @@
       window.setTimeout(() => {
         els.celebration.hidden = true;
       }, 240);
-    }, 3200);
+    }, 3800);
   }
 
   function formatDate(value) {
@@ -171,10 +176,47 @@
     }).format(new Date(value));
   }
 
-  function formatRatings(place) {
-    const fiqry = place.fiqryRating ? `Fiqry ${place.fiqryRating}/5` : "Fiqry -";
-    const isyana = place.isyanaRating ? `Isyana ${place.isyanaRating}/5` : "Isyana -";
+  function formatRatingsLegacy(place) {
+    const fiqry = place.fiqryRating ? `Fiqry ${"★".repeat(place.fiqryRating)}` : "Fiqry -";
+    const isyana = place.isyanaRating ? `Isyana ${"★".repeat(place.isyanaRating)}` : "Isyana -";
     return `${fiqry}, ${isyana}`;
+  }
+
+  function formatRatings(place) {
+    const bfRating = Number(place.fiqryRating);
+    const gfRating = Number(place.isyanaRating);
+    if (!bfRating || !gfRating) return "-";
+
+    const average = (bfRating + gfRating) / 2;
+    const formattedAverage = average
+      .toFixed(1)
+      .replace(".", ",")
+      .replace(",0", "");
+
+    return `<span class="rating-average">${formattedAverage}</span><i data-lucide="star"></i>`;
+  }
+
+  function renderMoodChecklist(place) {
+    renderMoodSide(els.bfMoodText, els.bfMoodScore, Number(place.fiqryRating), place.status);
+    renderMoodSide(els.gfMoodText, els.gfMoodScore, Number(place.isyanaRating), place.status);
+  }
+
+  function renderMoodSide(textEl, scoreEl, rating, status) {
+    if (rating) {
+      textEl.textContent = getMoodText(rating);
+      scoreEl.innerHTML = `${rating}/5 <i data-lucide="star"></i>`;
+      return;
+    }
+
+    textEl.textContent = status === "visited" ? "Memory saved" : "Ready for next trip";
+    scoreEl.textContent = status === "visited" ? "Visited together" : "Waiting list";
+  }
+
+  function getMoodText(rating) {
+    if (rating >= 5) return "Perfect moment";
+    if (rating >= 4) return "Worth visiting";
+    if (rating >= 3) return "Sweet little stop";
+    return "Tiny adventure";
   }
 
   function showStatus(message) {

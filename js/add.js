@@ -12,7 +12,7 @@
     category: document.getElementById("categoryInput"),
     description: document.getElementById("descriptionInput"),
     maps: document.getElementById("mapsInput"),
-    targetDate: document.getElementById("targetDateInput"),
+    previewMaps: document.getElementById("previewMapsButton"),
     placeStatus: document.getElementById("statusInput"),
     image: document.getElementById("imageInput")
   };
@@ -35,6 +35,8 @@
     }
 
     els.form.addEventListener("submit", savePlace);
+    els.maps.addEventListener("input", updateMapsPreview);
+    updateMapsPreview();
 
     if (window.lucide) window.lucide.createIcons();
   }
@@ -54,7 +56,7 @@
       els.category.value = place.category;
       els.description.value = place.description;
       els.maps.value = place.mapsUrl;
-      els.targetDate.value = place.targetDate || "";
+      updateMapsPreview();
       els.placeStatus.value = place.status;
       hideStatus();
     } catch (error) {
@@ -73,7 +75,6 @@
       category: els.category.value,
       description: els.description.value.trim(),
       maps_url: els.maps.value.trim(),
-      target_date: els.targetDate.value,
       status: els.placeStatus.value
     };
 
@@ -94,6 +95,14 @@
   function hideStatus() {
     els.status.hidden = true;
     els.status.textContent = "";
+  }
+
+  function updateMapsPreview() {
+    const url = els.maps.value.trim();
+    const isValid = /^https?:\/\/.+/i.test(url);
+    els.previewMaps.href = isValid ? url : "#";
+    els.previewMaps.setAttribute("aria-disabled", String(!isValid));
+    els.previewMaps.classList.toggle("disabled", !isValid);
   }
 
   document.addEventListener("DOMContentLoaded", init);
