@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Place detail for Place To Go.">
+    <title>Place Detail - Place To Go</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <main class="app-shell detail-shell">
+      <nav class="topbar detail-topbar" aria-label="Primary">
+        <a class="icon-link" href="index.html" aria-label="Back to places">
+          <i data-lucide="arrow-left"></i>
+        </a>
+        <a class="brand compact" href="index.html">
+          <span class="brand-mark"><i data-lucide="compass"></i></span>
+          <span>Place To Go</span>
+        </a>
+      </nav>
+
+      <section class="status-message" id="detailStatus" hidden></section>
+      <article class="detail-view" id="detailView" hidden>
+        <div class="detail-cover-wrap">
+          <img class="detail-cover" id="detailCover" src="" alt="">
+          <span class="status-badge detail-badge" id="detailBadge"></span>
+        </div>
+
+        <section class="detail-content">
+          <div class="place-meta">
+            <span class="category-pill" id="detailCategory"></span>
+            <span class="location-text"><i data-lucide="map-pin"></i><span id="detailLocation"></span></span>
+          </div>
+          <h1 id="detailName"></h1>
+          <p class="description large" id="detailDescription"></p>
+
+          <div class="detail-actions">
+            <a class="button primary" id="detailMaps" href="#" target="_blank" rel="noreferrer">
+              <i data-lucide="map"></i>
+              <span>Open Google Maps</span>
+            </a>
+            <a class="button secondary" id="detailIssue" href="#" target="_blank" rel="noreferrer">
+              <i data-lucide="github"></i>
+              <span>View Issue</span>
+            </a>
+          </div>
+
+          <section class="detail-notes" id="detailNotesWrap" hidden>
+            <p class="eyebrow">Notes</p>
+            <p id="detailNotes"></p>
+          </section>
+        </section>
+      </article>
+    </main>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/details.js"></script>
+  </body>
+</html>
