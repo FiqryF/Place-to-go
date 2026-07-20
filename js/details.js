@@ -58,11 +58,7 @@
     els.visitForm.addEventListener("submit", markVisited);
     els.visitSheetBackdrop.addEventListener("click", closeVisitForm);
     els.cancelVisit.addEventListener("click", closeVisitForm);
-    els.ratingPickers.forEach((picker) => {
-      picker.querySelectorAll("[data-rating]").forEach((button) => {
-        button.addEventListener("click", () => selectRating(picker, button));
-      });
-    });
+    els.ratingPickers.forEach(registerRatingPicker);
 
     if (window.lucide) window.lucide.createIcons();
   }
@@ -176,11 +172,6 @@
     }).format(new Date(value));
   }
 
-  function formatRatingsLegacy(place) {
-    const fiqry = place.fiqryRating ? `Fiqry ${"★".repeat(place.fiqryRating)}` : "Fiqry -";
-    const isyana = place.isyanaRating ? `Isyana ${"★".repeat(place.isyanaRating)}` : "Isyana -";
-    return `${fiqry}, ${isyana}`;
-  }
 
   function formatRatings(place) {
     const bfRating = Number(place.fiqryRating);
@@ -194,6 +185,16 @@
       .replace(",0", "");
 
     return `<span class="rating-average">${formattedAverage}</span><i data-lucide="star"></i>`;
+  }
+
+  function registerRatingPicker(picker) {
+    picker.addEventListener("click", handleRatingPickerClick);
+  }
+
+  function handleRatingPickerClick(event) {
+    const button = event.target.closest("[data-rating]");
+    if (!button) return;
+    selectRating(event.currentTarget, button);
   }
 
   function renderMoodChecklist(place) {
@@ -231,3 +232,4 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+

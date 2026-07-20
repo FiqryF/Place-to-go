@@ -86,7 +86,8 @@
 
   function normalizePlace(row) {
     const title = row.name || row.title || "Untitled place";
-    const mapsUrl = row.maps_url || row.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${title} ${row.location || ""}`)}`;
+    const mapQuery = encodeURIComponent([title, row.location || ""].join(" ").trim());
+    const mapsUrl = row.maps_url || row.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
     const imageUrl = row.image_url || row.imageUrl || fallbackImages[0];
 
     return {

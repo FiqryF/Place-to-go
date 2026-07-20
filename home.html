@@ -65,6 +65,7 @@
 
     <section class="controls" aria-label="Search and filter">
       <label class="search-box" for="searchInput">
+        <span class="sr-only">Search place or city</span>
         <i data-lucide="search"></i>
         <input id="searchInput" type="search" placeholder="Search place or city" autocomplete="off">
       </label>
@@ -94,8 +95,7 @@
       <i data-lucide="chevrons-down"></i>
     </button>
 
-    <section class="confirm-dialog" id="logoutDialog" aria-labelledby="logoutDialogTitle" aria-modal="true"
-      role="dialog" hidden>
+    <dialog class="confirm-dialog" id="logoutDialog" aria-labelledby="logoutDialogTitle" hidden>
       <div class="confirm-backdrop"></div>
       <div class="confirm-card">
         <span class="brand-mark confirm-icon"><i data-lucide="log-out"></i></span>
@@ -106,7 +106,7 @@
           <button class="button danger" id="confirmLogoutButton" type="button">Yakin</button>
         </div>
       </div>
-    </section>
+    </dialog>
   </main>
 
   <template id="placeCardTemplate">
@@ -120,7 +120,7 @@
           <span class="category-pill"></span>
           <span class="location-text"><i data-lucide="map-pin"></i><span></span></span>
         </div>
-        <h3></h3>
+        <h3>Place title</h3>
         <p class="description"></p>
         <div class="card-actions">
           <a class="button secondary maps-link" href="#" target="_blank" rel="noreferrer">
@@ -136,8 +136,8 @@
     </article>
   </template>
 
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@1.25.0/dist/umd/lucide.min.js" integrity="sha384-UoXAhqcCCjwD94x4CCSExEHvtO49AfNiY7g/IxDgrPtx4U6o6tvy1cScx9v/RrS9" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.7" integrity="sha384-BmlQlKlDvXvKoxkn5OQuUo/aJQCTXeB+Kls6EccBmG4Kf8AXvp89RtO9MtPxP/r5" crossorigin="anonymous"></script>
   <script src="js/config.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>

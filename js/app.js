@@ -81,6 +81,7 @@
       state.places = [];
       window.location.href = "index.html";
     } catch (error) {
+      console.warn("Logout failed.", error);
       showStatus(error.message || "Logout failed. Please try again.");
     } finally {
       els.confirmLogout.disabled = false;
@@ -93,8 +94,10 @@
       state.places = await window.PlaceToGoData.fetchPlaces();
       hideStatus();
     } catch (error) {
+      console.warn("Could not load places from Supabase.", error);
       state.places = window.PlaceToGoData.samplePlaces;
-      showStatus("Could not reach Supabase, so sample places are shown for now. Check js/config.js and your Supabase policies.");
+      const detail = error?.message ? ` ${error.message}` : "";
+      showStatus(`Could not reach Supabase, so sample places are shown for now.${detail}`);
     }
     render();
   }

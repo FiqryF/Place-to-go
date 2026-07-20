@@ -69,6 +69,18 @@ p {
   display: none !important;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .app-shell {
   position: relative;
   width: min(100%, 430px);
@@ -2241,6 +2253,15 @@ p {
   display: grid;
   place-items: center;
   padding: 22px;
+}
+
+.confirm-dialog {
+  width: auto;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  border: 0;
+  background: transparent;
 }
 
 .confirm-card,
