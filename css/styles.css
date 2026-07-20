@@ -20,16 +20,36 @@
 }
 
 html {
+  width: 100%;
+  max-width: 100%;
   min-height: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 body {
+  position: relative;
   margin: 0;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
   color: var(--ink);
   background: var(--paper);
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: 0;
+}
+
+main,
+header,
+section,
+article,
+nav,
+form,
+div {
+  min-width: 0;
 }
 
 a {
@@ -84,11 +104,29 @@ p {
 .app-shell {
   position: relative;
   width: min(100%, 430px);
+  max-width: 100%;
   min-height: 100vh;
   margin: 0 auto;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   padding: 18px 16px 92px;
   background: var(--paper);
+}
+
+.app-footer {
+  width: 100%;
+  max-width: 100%;
+  margin: 26px 0 0;
+  padding: 12px 0 0;
+  color: rgba(16, 21, 34, 0.52);
+  text-align: center;
+}
+
+.app-footer p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .topbar {
@@ -642,6 +680,9 @@ p {
   margin: 0;
   padding: 0 0 1px;
   overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -1092,9 +1133,258 @@ p {
 }
 
 .home-page .see-all-button {
+  display: flex;
+  width: fit-content;
+  min-width: 190px;
+  min-height: 44px;
+  margin: 16px auto 0 !important;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
   background: var(--white);
   color: var(--sky);
-  box-shadow: 0 12px 24px rgba(47, 128, 237, 0.08);
+  box-shadow: 0 14px 26px rgba(18, 103, 223, 0.16);
+}
+
+.home-page .see-all-button svg {
+  width: 17px;
+  height: 17px;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--sky-soft);
+}
+
+/* Wishlist and visited full page */
+.places-page {
+  background: var(--sky);
+}
+
+.places-page .app-shell {
+  padding: 0 16px 92px;
+  background:
+    repeating-radial-gradient(circle at -22px 92px, rgba(255, 255, 255, 0.16) 0 48px, rgba(255, 255, 255, 0.08) 48px 76px, transparent 76px 104px),
+    repeating-radial-gradient(circle at 105% 12%, rgba(255, 255, 255, 0.14) 0 46px, rgba(255, 255, 255, 0.07) 46px 74px, transparent 74px 102px),
+    linear-gradient(180deg, var(--sky), var(--sky-deep));
+}
+
+.places-page .topbar {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px 0;
+}
+
+.places-page .icon-link {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--sky);
+  box-shadow: 0 12px 22px rgba(16, 21, 34, 0.14);
+}
+
+.places-hero,
+.places-page .controls {
+  border-radius: 34px;
+  background:
+    repeating-linear-gradient(112deg, rgba(72, 169, 239, 0.1) 0 1px, transparent 1px 32px),
+    var(--white);
+  box-shadow: 0 18px 34px rgba(16, 21, 34, 0.16);
+}
+
+.places-hero {
+  position: relative;
+  margin-bottom: 14px;
+  padding: 28px 18px 24px;
+  overflow: hidden;
+}
+
+.places-hero::after {
+  content: "";
+  position: absolute;
+  right: -34px;
+  bottom: -44px;
+  width: 138px;
+  height: 138px;
+  border-radius: 50%;
+  background: rgba(255, 230, 128, 0.36);
+}
+
+.places-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.places-hero h1 {
+  max-width: 260px;
+  margin-bottom: 8px;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.places-hero .intro-copy {
+  max-width: 286px;
+  color: #6d9fd0;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.places-page .controls {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 12px;
+}
+
+.places-jump-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.places-jump-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sky-soft);
+  color: var(--sky);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.places-jump-row button.active {
+  background: var(--sky);
+  color: var(--white);
+}
+
+.full-section {
+  margin-top: 20px;
+}
+
+.full-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+
+.full-section-heading .eyebrow,
+.full-section-heading h2 {
+  color: var(--white);
+}
+
+.full-section-heading h2 {
+  font-size: 24px;
+}
+
+.full-section-heading > span {
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--sky);
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 12px 22px rgba(16, 21, 34, 0.12);
+}
+
+.full-places-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.full-places-grid .place-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 26px;
+  background: var(--white);
+  box-shadow: 0 16px 28px rgba(16, 21, 34, 0.16);
+}
+
+.full-places-grid .cover-link,
+.full-places-grid .place-cover {
+  height: 128px;
+  min-height: 128px;
+  max-height: 128px;
+}
+
+.full-places-grid .place-cover {
+  width: 100%;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.full-places-grid .place-content {
+  display: flex;
+  flex-direction: column;
+  height: 158px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.full-places-grid .place-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 0;
+  margin-bottom: 6px;
+}
+
+.full-places-grid .category-pill {
+  min-height: 18px;
+  padding: 0 7px;
+  font-size: 8px;
+}
+
+.full-places-grid .location-text {
+  width: 100%;
+  font-size: 8px;
+}
+
+.full-places-grid .place-card h3 {
+  min-height: 0;
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.1;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.full-places-grid .description {
+  height: 30px;
+  margin-bottom: 9px;
+  font-size: 9.5px;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.full-places-grid .card-actions {
+  grid-template-columns: 34px 1fr;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.full-places-grid .card-actions .button {
+  min-height: 32px;
+  border-radius: 14px;
+  font-size: 10px;
 }
 
 /* Shared forms and detail pages */

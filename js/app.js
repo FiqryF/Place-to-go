@@ -2,8 +2,7 @@
   const state = {
     places: [],
     filter: "wishlist",
-    query: "",
-    expanded: false
+    query: ""
   };
 
   const previewLimit = 6;
@@ -36,23 +35,18 @@
 
     els.search.addEventListener("input", (event) => {
       state.query = event.target.value.trim().toLowerCase();
-      state.expanded = false;
       render();
     });
 
     els.chips.forEach((chip) => {
       chip.addEventListener("click", () => {
         state.filter = chip.dataset.filter;
-        state.expanded = false;
         render();
       });
     });
 
     els.refresh.addEventListener("click", loadPlaces);
-    els.seeAll.addEventListener("click", () => {
-      state.expanded = true;
-      render();
-    });
+    els.seeAll.addEventListener("click", openFullPlacesPage);
     if (els.logout) els.logout.addEventListener("click", openLogoutDialog);
     if (els.cancelLogout) els.cancelLogout.addEventListener("click", closeLogoutDialog);
     if (els.confirmLogout) els.confirmLogout.addEventListener("click", logout);
@@ -135,7 +129,7 @@
 
   function renderList() {
     const visiblePlaces = getVisiblePlaces();
-    const placesToRender = state.expanded ? visiblePlaces : visiblePlaces.slice(0, previewLimit);
+    const placesToRender = visiblePlaces.slice(0, previewLimit);
     els.list.innerHTML = "";
     els.seeAll.hidden = true;
 
@@ -174,12 +168,16 @@
       els.list.appendChild(card);
     });
 
-    if (visiblePlaces.length > previewLimit && !state.expanded) {
+    if (visiblePlaces.length > previewLimit) {
       const remaining = visiblePlaces.length - previewLimit;
       els.seeAll.hidden = false;
       els.seeAll.querySelector("span").textContent = `See all ${visiblePlaces.length} places`;
-      els.seeAll.setAttribute("aria-label", `Show ${remaining} more places`);
+      els.seeAll.setAttribute("aria-label", `Open page with ${remaining} more places`);
     }
+  }
+
+  function openFullPlacesPage() {
+    window.location.href = "places.html";
   }
 
   function showStatus(message) {
