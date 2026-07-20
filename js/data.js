@@ -2,193 +2,263 @@
   const fallbackImages = [
     "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80",
+    "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80",
     "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80"
   ];
 
   const samplePlaces = [
     {
       id: "sample-ubud",
-      issueNumber: 0,
       title: "Ubud Art Market",
+      name: "Ubud Art Market",
       location: "Ubud, Bali",
       category: "Culture",
       description: "A slow morning walk for handmade pieces, coffee, and small streets around central Ubud.",
       status: "wishlist",
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Ubud%20Art%20Market",
+      maps_url: "https://www.google.com/maps/search/?api=1&query=Ubud%20Art%20Market",
       imageUrl: fallbackImages[0],
-      notes: "Sample data. Connect GitHub Issues in js/config.js to show your real places.",
-      issueUrl: "#"
+      image_url: fallbackImages[0],
+      targetDate: "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
     {
       id: "sample-lombok",
-      issueNumber: 0,
       title: "Kuta Lombok",
+      name: "Kuta Lombok",
       location: "Lombok, Indonesia",
       category: "Beach",
       description: "Bright water, open roads, and a weekend that should probably include sunset seafood.",
       status: "wishlist",
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Kuta%20Lombok",
+      maps_url: "https://www.google.com/maps/search/?api=1&query=Kuta%20Lombok",
       imageUrl: fallbackImages[1],
-      notes: "",
-      issueUrl: "#"
+      image_url: fallbackImages[1],
+      targetDate: "",
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      updatedAt: new Date(Date.now() - 86400000).toISOString()
     },
     {
       id: "sample-bandung",
-      issueNumber: 0,
       title: "Braga Street",
+      name: "Braga Street",
       location: "Bandung, Indonesia",
       category: "City Walk",
       description: "Old buildings, cafes, and an easy afternoon route for photos and snacks.",
       status: "visited",
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Braga%20Street%20Bandung",
+      maps_url: "https://www.google.com/maps/search/?api=1&query=Braga%20Street%20Bandung",
       imageUrl: fallbackImages[2],
-      notes: "Closed GitHub issues will appear as visited places.",
-      issueUrl: "#"
+      image_url: fallbackImages[2],
+      targetDate: "",
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
+      updatedAt: new Date(Date.now() - 172800000).toISOString()
     }
   ];
+
+  let cachedClient = null;
 
   function getConfig() {
     return window.PLACE_TO_GO_CONFIG || {};
   }
 
-  function inferRepo() {
+  function isSupabaseConfigured() {
     const config = getConfig();
-    if (config.githubOwner && config.githubRepo) {
-      return { owner: config.githubOwner, repo: config.githubRepo };
+    return Boolean(
+      config.supabaseUrl &&
+      config.supabaseAnonKey &&
+      !String(config.supabaseUrl).includes("YOUR_") &&
+      !String(config.supabaseAnonKey).includes("YOUR_")
+    );
+  }
+
+  function getClient() {
+    if (!isSupabaseConfigured()) return null;
+    if (!window.supabase) {
+      throw new Error("Supabase JS could not be loaded.");
     }
-
-    const host = window.location.hostname;
-    const pathRepo = window.location.pathname.split("/").filter(Boolean)[0];
-    if (host.endsWith(".github.io") && pathRepo) {
-      return { owner: host.replace(".github.io", ""), repo: pathRepo };
+    if (!cachedClient) {
+      cachedClient = window.supabase.createClient(getConfig().supabaseUrl, getConfig().supabaseAnonKey);
     }
-
-    return null;
+    return cachedClient;
   }
 
-  function getRepoLinks() {
-    const repo = inferRepo();
-    const config = getConfig();
-    if (!repo) {
-      return {
-        issuesApi: "",
-        newIssueUrl: "#",
-        repoUrl: "#"
-      };
-    }
-
-    const label = encodeURIComponent(config.issueLabel || "place");
-    const template = encodeURIComponent(config.issueTemplate || "place.yml");
-    const base = `https://github.com/${repo.owner}/${repo.repo}`;
-    return {
-      issuesApi: `https://api.github.com/repos/${repo.owner}/${repo.repo}/issues?state=all&labels=${label}&per_page=100`,
-      newIssueUrl: `${base}/issues/new?template=${template}`,
-      repoUrl: base
-    };
-  }
-
-  function parseIssueBody(body) {
-    const normalized = body || "";
-    const fields = {};
-    const headingPattern = /^###\s+(.+?)\s*$/gm;
-    const headings = [];
-    let match;
-
-    while ((match = headingPattern.exec(normalized)) !== null) {
-      headings.push({
-        label: normalizeLabel(match[1]),
-        headingStart: match.index,
-        start: headingPattern.lastIndex
-      });
-    }
-
-    headings.forEach((heading, index) => {
-      const end = headings[index + 1] ? headings[index + 1].headingStart : normalized.length;
-      fields[heading.label] = cleanField(normalized.slice(heading.start, end));
-    });
-
-    return fields;
-  }
-
-  function normalizeLabel(label) {
-    return String(label).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
-  }
-
-  function cleanField(value) {
-    return String(value)
-      .replace(/<!--[\s\S]*?-->/g, "")
-      .replace(/^\s*_\s*No response\s*_\s*$/gim, "")
-      .trim();
-  }
-
-  function pick(fields, keys, fallback) {
-    for (const key of keys) {
-      if (fields[key]) return fields[key];
-    }
-    return fallback;
-  }
-
-  function issueToPlace(issue, index) {
-    const fields = parseIssueBody(issue.body);
-    const title = pick(fields, ["place_name", "name", "nama_tempat"], issue.title.replace(/^\[Place\]\s*/i, ""));
-    const location = pick(fields, ["location", "lokasi", "city"], "Unknown location");
-    const category = pick(fields, ["category", "kategori"], "Place");
-    const description = pick(fields, ["short_description", "description", "deskripsi_singkat", "deskripsi"], "A place saved for later.");
-    const mapsUrl = pick(fields, ["google_maps_url", "maps_url", "google_maps_link"], `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${title} ${location}`)}`);
-    const imageUrl = pick(fields, ["cover_image_url", "image_url", "cover_url", "photo_url"], fallbackImages[index % fallbackImages.length]);
-    const notes = pick(fields, ["notes", "catatan"], "");
+  function normalizePlace(row) {
+    const title = row.name || row.title || "Untitled place";
+    const mapsUrl = row.maps_url || row.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${title} ${row.location || ""}`)}`;
+    const imageUrl = row.image_url || row.imageUrl || fallbackImages[0];
 
     return {
-      id: String(issue.number),
-      issueNumber: issue.number,
+      ...row,
+      id: String(row.id),
       title,
-      location,
-      category,
-      description,
-      status: issue.state === "closed" ? "visited" : "wishlist",
+      name: title,
+      location: row.location || "Unknown location",
+      category: row.category || "Place",
+      description: row.description || "A place saved for later.",
+      status: row.status === "visited" ? "visited" : "wishlist",
       mapsUrl,
+      maps_url: mapsUrl,
       imageUrl,
-      notes,
-      issueUrl: issue.html_url
+      image_url: imageUrl,
+      targetDate: row.target_date || row.targetDate || "",
+      createdAt: row.created_at || row.createdAt || "",
+      updatedAt: row.updated_at || row.updatedAt || ""
     };
   }
 
   async function fetchPlaces() {
-    const links = getRepoLinks();
+    const client = getClient();
     const config = getConfig();
 
-    if (!links.issuesApi) {
+    if (!client) {
       return config.useSampleDataWhenEmpty ? samplePlaces : [];
     }
 
-    const response = await fetch(links.issuesApi, {
-      headers: { Accept: "application/vnd.github+json" }
-    });
+    const { data, error } = await client
+      .from("places")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    if (!response.ok) {
-      throw new Error(`GitHub API returned ${response.status}`);
+    if (error) throw error;
+    const places = (data || []).map(normalizePlace);
+    return places;
+  }
+
+  async function fetchPlace(id) {
+    if (!id) return null;
+    const client = getClient();
+    if (!client) {
+      return samplePlaces.find((place) => place.id === id) || samplePlaces[0] || null;
     }
 
-    const issues = await response.json();
-    const places = issues
-      .filter((issue) => !issue.pull_request)
-      .map(issueToPlace)
-      .sort((a, b) => {
-        if (a.status !== b.status) return a.status === "wishlist" ? -1 : 1;
-        return Number(b.issueNumber) - Number(a.issueNumber);
-      });
+    const { data, error } = await client
+      .from("places")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-    return places.length || config.useSampleDataWhenEmpty ? places.length ? places : samplePlaces : [];
+    if (error) throw error;
+    return data ? normalizePlace(data) : null;
   }
 
   function findPlaceById(places, id) {
     return places.find((place) => place.id === id) || places[0];
   }
 
+  async function getCurrentUser() {
+    const client = getClient();
+    if (!client) return null;
+    const { data, error } = await client.auth.getUser();
+    if (error) return null;
+    return data.user || null;
+  }
+
+  async function signIn(email, password) {
+    const client = getClient();
+    if (!client) throw new Error("Supabase is not configured yet.");
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data.user;
+  }
+
+  async function signOut() {
+    const client = getClient();
+    if (!client) return;
+    const { error } = await client.auth.signOut();
+    if (error) throw error;
+  }
+
+  async function requireAdmin() {
+    const user = await getCurrentUser();
+    if (!user) {
+      const next = encodeURIComponent(`${window.location.pathname.split("/").pop() || "index.html"}${window.location.search}`);
+      window.location.href = `login.html?next=${next}`;
+      return null;
+    }
+    return user;
+  }
+
+  async function uploadImage(file) {
+    if (!file || !file.size) return "";
+    const client = getClient();
+    if (!client) throw new Error("Supabase is not configured yet.");
+
+    const bucket = getConfig().supabaseStorageBucket || "place-images";
+    const extension = file.name.split(".").pop() || "jpg";
+    const path = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const { error } = await client.storage.from(bucket).upload(path, file, {
+      cacheControl: "3600",
+      upsert: false
+    });
+
+    if (error) throw error;
+    const { data } = client.storage.from(bucket).getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  async function savePlace(payload, file, id) {
+    const client = getClient();
+    if (!client) throw new Error("Supabase is not configured yet.");
+
+    const imageUrl = await uploadImage(file);
+    const row = {
+      name: payload.name,
+      location: payload.location,
+      category: payload.category,
+      description: payload.description,
+      maps_url: payload.maps_url,
+      status: payload.status,
+      target_date: payload.target_date || null,
+      updated_at: new Date().toISOString()
+    };
+
+    if (imageUrl) row.image_url = imageUrl;
+    if (!id && !row.image_url) row.image_url = payload.image_url || "";
+
+    const query = id
+      ? client.from("places").update(row).eq("id", id).select("*").single()
+      : client.from("places").insert(row).select("*").single();
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return normalizePlace(data);
+  }
+
+  async function updateStatus(id, status) {
+    const client = getClient();
+    if (!client) throw new Error("Supabase is not configured yet.");
+    const { data, error } = await client
+      .from("places")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+    return normalizePlace(data);
+  }
+
+  async function deletePlace(id) {
+    const client = getClient();
+    if (!client) throw new Error("Supabase is not configured yet.");
+    const { error } = await client.from("places").delete().eq("id", id);
+    if (error) throw error;
+  }
+
   window.PlaceToGoData = {
     fetchPlaces,
+    fetchPlace,
     findPlaceById,
-    getRepoLinks,
+    getCurrentUser,
+    isSupabaseConfigured,
+    requireAdmin,
+    savePlace,
+    signIn,
+    signOut,
+    updateStatus,
+    deletePlace,
     samplePlaces
   };
 })();

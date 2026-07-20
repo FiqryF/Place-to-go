@@ -24,36 +24,70 @@
 
       <section class="add-hero">
         <p class="eyebrow">Add place</p>
-        <h1>Save a new place for later.</h1>
-        <p class="intro-copy">Places are stored as GitHub Issues so the website stays lightweight and works on GitHub Pages.</p>
-      </section>
-
-      <section class="add-panel">
-        <div class="add-step">
-          <span><i data-lucide="file-plus-2"></i></span>
-          <div>
-            <h2>Open the issue form</h2>
-            <p>Fill in the place name, location, category, short description, Google Maps URL, and cover image URL.</p>
-          </div>
-        </div>
-        <div class="add-step">
-          <span><i data-lucide="check-circle-2"></i></span>
-          <div>
-            <h2>Submit as wishlist</h2>
-            <p>New open issues appear as Wishlist. Close the issue later to move it into Visited.</p>
-          </div>
-        </div>
+        <h1 id="formTitle">Save a new place for later.</h1>
+        <p class="intro-copy">Upload a photo from your gallery and save the place directly to Supabase.</p>
       </section>
 
       <section class="status-message" id="addStatus" hidden></section>
 
-      <a class="button primary wide-button" id="openIssueForm" href="#" target="_blank" rel="noreferrer">
-        <i data-lucide="plus"></i>
-        <span>Open Add Place Form</span>
-      </a>
+      <form class="place-form" id="placeForm">
+        <label>
+          <span>Name</span>
+          <input id="nameInput" name="name" type="text" placeholder="Ubud Art Market" required>
+        </label>
+        <label>
+          <span>Location</span>
+          <input id="locationInput" name="location" type="text" placeholder="Ubud, Bali" required>
+        </label>
+        <label>
+          <span>Category</span>
+          <select id="categoryInput" name="category" required>
+            <option value="Beach">Beach</option>
+            <option value="Cafe">Cafe</option>
+            <option value="City Walk">City Walk</option>
+            <option value="Culture">Culture</option>
+            <option value="Food">Food</option>
+            <option value="Nature">Nature</option>
+            <option value="Stay">Stay</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label>
+          <span>Description</span>
+          <textarea id="descriptionInput" name="description" rows="4" placeholder="A quiet place for a slow morning walk." required></textarea>
+        </label>
+        <label>
+          <span>Google Maps URL</span>
+          <input id="mapsInput" name="maps_url" type="url" placeholder="https://www.google.com/maps/place/..." required>
+        </label>
+        <label>
+          <span>Target date</span>
+          <input id="targetDateInput" name="target_date" type="date">
+        </label>
+        <label>
+          <span>Status</span>
+          <select id="statusInput" name="status" required>
+            <option value="wishlist">Wishlist</option>
+            <option value="visited">Visited</option>
+          </select>
+        </label>
+        <label>
+          <span>Photo</span>
+          <input id="imageInput" name="image" type="file" accept="image/*">
+        </label>
+        <button class="button primary wide-button" id="savePlaceButton" type="submit">
+          <i data-lucide="save"></i>
+          <span>Save Place</span>
+        </button>
+        <button class="button secondary wide-button" id="logoutButton" type="button">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </form>
     </main>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/add.js"></script>

@@ -18,27 +18,33 @@
             <span class="brand-mark"><i data-lucide="compass"></i></span>
             <span>Place To Go</span>
           </a>
-          <a class="icon-link" id="mapOverviewLink" href="#" aria-label="Open saved places in Google Maps" target="_blank" rel="noreferrer">
-            <i data-lucide="map"></i>
+          <a class="icon-link" href="login.html" aria-label="Login as admin">
+            <i data-lucide="log-in"></i>
           </a>
         </nav>
 
         <section class="intro" aria-labelledby="pageTitle">
-          <p class="eyebrow">Travel wishlist</p>
-          <h1 id="pageTitle">The places Fiqry &amp; Isyana want to visit.</h1>
-          <p class="intro-copy">A small journal of places worth keeping close, from quiet cafes to long-awaited cities.</p>
+          <div class="intro-copy-wrap">
+            <p class="eyebrow">Travel wishlist</p>
+            <h1 id="pageTitle">The places Fiqry &amp; Isyana want to visit.</h1>
+            <p class="intro-copy">A small journal of places worth keeping close, from quiet cafes to long-awaited cities.</p>
+          </div>
+
         </section>
 
         <section class="stats-grid" aria-label="Place statistics">
           <article class="stat-card">
+            <i data-lucide="map-pin"></i>
             <span class="stat-value" id="totalCount">0</span>
             <span class="stat-label">Total Places</span>
           </article>
           <article class="stat-card">
+            <i data-lucide="heart"></i>
             <span class="stat-value" id="wishlistCount">0</span>
             <span class="stat-label">Wishlist</span>
           </article>
           <article class="stat-card">
+            <i data-lucide="check-circle-2"></i>
             <span class="stat-value" id="visitedCount">0</span>
             <span class="stat-label">Visited</span>
           </article>
@@ -71,10 +77,10 @@
 
       <section class="status-message" id="statusMessage" hidden></section>
       <section class="places-list" id="placesList" aria-live="polite"></section>
-
-      <a class="floating-add" id="addPlaceButton" href="#" target="_blank" rel="noreferrer" aria-label="Add a new place">
-        <i data-lucide="plus"></i>
-      </a>
+      <button class="see-all-button" id="seeAllButton" type="button" hidden>
+        <span>See all</span>
+        <i data-lucide="chevrons-down"></i>
+      </button>
     </main>
 
     <template id="placeCardTemplate">
@@ -105,6 +111,7 @@
     </template>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>

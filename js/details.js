@@ -8,27 +8,35 @@
     location: document.getElementById("detailLocation"),
     name: document.getElementById("detailName"),
     description: document.getElementById("detailDescription"),
+    statusText: document.getElementById("detailStatusText"),
+    created: document.getElementById("detailCreated"),
     maps: document.getElementById("detailMaps"),
-    issue: document.getElementById("detailIssue"),
-    notesWrap: document.getElementById("detailNotesWrap"),
-    notes: document.getElementById("detailNotes")
+    edit: document.getElementById("detailEdit"),
+    adminPanel: document.getElementById("detailAdminPanel"),
+    markVisited: document.getElementById("markVisitedButton"),
+    deletePlace: document.getElementById("deletePlaceButton")
   };
+
+  let currentPlace = null;
 
   async function init() {
     showStatus("Loading place...");
     try {
-      const places = await window.PlaceToGoData.fetchPlaces();
       const id = new URLSearchParams(window.location.search).get("id");
-      const place = window.PlaceToGoData.findPlaceById(places, id);
-      if (!place) {
+      currentPlace = await window.PlaceToGoData.fetchPlace(id);
+      if (!currentPlace) {
         showStatus("Place not found.");
         return;
       }
-      render(place);
+      render(currentPlace);
       hideStatus();
+      await renderAdminControls();
     } catch (error) {
-      showStatus("Could not load this place from GitHub Issues.");
+      showStatus(error.message || "Could not load this place.");
     }
+
+    els.markVisited.addEventListener("click", markAsVisited);
+    els.deletePlace.addEventListener("click", removePlace);
 
     if (window.lucide) window.lucide.createIcons();
   }
@@ -44,16 +52,53 @@
     els.location.textContent = place.location;
     els.name.textContent = place.title;
     els.description.textContent = place.description;
+    els.statusText.textContent = place.status === "visited" ? "Visited" : "Wishlist";
+    els.created.textContent = formatDate(place.createdAt);
     els.maps.href = place.mapsUrl;
-    els.issue.href = place.issueUrl || "#";
-    els.issue.hidden = !place.issueUrl || place.issueUrl === "#";
+    els.edit.href = `add.html?id=${encodeURIComponent(place.id)}`;
+    els.markVisited.hidden = place.status === "visited";
+  }
 
-    if (place.notes) {
-      els.notesWrap.hidden = false;
-      els.notes.textContent = place.notes;
-    } else {
-      els.notesWrap.hidden = true;
+  async function renderAdminControls() {
+    const user = await window.PlaceToGoData.getCurrentUser();
+    els.edit.hidden = !user;
+    els.adminPanel.hidden = !user;
+  }
+
+  async function markAsVisited() {
+    if (!currentPlace) return;
+    showStatus("Updating status...");
+    try {
+      currentPlace = await window.PlaceToGoData.updateStatus(currentPlace.id, "visited");
+      render(currentPlace);
+      hideStatus();
+      if (window.lucide) window.lucide.createIcons();
+    } catch (error) {
+      showStatus(error.message || "Could not update status.");
     }
+  }
+
+  async function removePlace() {
+    if (!currentPlace) return;
+    const confirmed = window.confirm(`Delete ${currentPlace.title}?`);
+    if (!confirmed) return;
+
+    showStatus("Deleting place...");
+    try {
+      await window.PlaceToGoData.deletePlace(currentPlace.id);
+      window.location.href = "index.html";
+    } catch (error) {
+      showStatus(error.message || "Could not delete this place.");
+    }
+  }
+
+  function formatDate(value) {
+    if (!value) return "-";
+    return new Intl.DateTimeFormat("en", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }).format(new Date(value));
   }
 
   function showStatus(message) {

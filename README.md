@@ -1,22 +1,71 @@
 # Place To Go
 
-Mobile-first travel wishlist website for Fiqry & Isyana. It runs on GitHub Pages and reads places from GitHub Issues.
+Mobile-first travel wishlist app for Fiqry & Isyana. It is hosted on GitHub Pages and uses Supabase for database, auth, and image storage.
 
 ## Setup
 
-1. Push this folder to a GitHub repository.
-2. Enable GitHub Pages for the repository.
-3. Open `js/config.js` and set:
+Edit `js/config.js`:
 
 ```js
-githubOwner: "your-github-username",
-githubRepo: "your-repository-name"
+supabaseUrl: "https://your-project.supabase.co",
+supabaseAnonKey: "your-anon-key",
+supabaseStorageBucket: "place-images"
 ```
 
-For a standard project page at `https://username.github.io/repository-name/`, the app can infer the repository automatically.
+Create a public Supabase Storage bucket named `place-images`.
 
-## Add Places
+## Database
 
-Use the floating add button on the website. It opens the GitHub Issue Form in `.github/ISSUE_TEMPLATE/place.yml`.
+Run `supabase/schema.sql` in the Supabase SQL Editor, or create the `places` table manually:
 
-Open issues are shown as `Wishlist`. Closed issues are shown as `Visited`.
+```sql
+create table public.places (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  location text not null,
+  category text not null,
+  description text not null,
+  maps_url text not null,
+  image_url text,
+  status text not null default 'wishlist' check (status in ('wishlist', 'visited')),
+  target_date date,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+```
+
+Suggested RLS:
+
+```sql
+alter table public.places enable row level security;
+
+create policy "Anyone can read places"
+on public.places for select
+using (true);
+
+create policy "Authenticated admins can insert places"
+on public.places for insert
+to authenticated
+with check (true);
+
+create policy "Authenticated admins can update places"
+on public.places for update
+to authenticated
+using (true)
+with check (true);
+
+create policy "Authenticated admins can delete places"
+on public.places for delete
+to authenticated
+using (true);
+```
+
+For Storage, allow public reads and authenticated uploads to the `place-images` bucket.
+
+## Pages
+
+- `index.html`: public home, search, filters, cards, statistics
+- `details.html`: public detail page, admin controls when logged in
+- `login.html`: Supabase Auth login
+- `admin.html`: admin dashboard after login
+- `add.html`: admin add/edit form with image upload

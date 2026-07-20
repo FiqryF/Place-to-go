@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Admin dashboard for Place To Go.">
+    <title>Admin - Place To Go</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <main class="app-shell detail-shell">
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand compact" href="index.html">
+          <span class="brand-mark"><i data-lucide="compass"></i></span>
+          <span>Place To Go</span>
+        </a>
+        <button class="icon-link icon-button" id="logoutButton" type="button" aria-label="Logout">
+          <i data-lucide="log-out"></i>
+        </button>
+      </nav>
+
+      <section class="add-hero">
+        <p class="eyebrow">Admin</p>
+        <h1>Manage places to go.</h1>
+        <p class="intro-copy">Add a new destination, then edit, delete, or mark places as visited from the detail page.</p>
+      </section>
+
+      <section class="status-message" id="adminStatus" hidden></section>
+
+      <section class="admin-menu">
+        <a class="admin-menu-item" href="add.html">
+          <span><i data-lucide="plus"></i></span>
+          <div>
+            <h2>Add place</h2>
+            <p>Save a new place with photo, maps URL, category, and status.</p>
+          </div>
+          <i data-lucide="arrow-up-right"></i>
+        </a>
+        <a class="admin-menu-item" href="index.html">
+          <span><i data-lucide="layout-grid"></i></span>
+          <div>
+            <h2>View wishlist</h2>
+            <p>Open the public wishlist page and check how visitors see it.</p>
+          </div>
+          <i data-lucide="arrow-up-right"></i>
+        </a>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/admin.js"></script>
+  </body>
+</html>

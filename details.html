@@ -36,27 +36,44 @@
           </div>
           <h1 id="detailName"></h1>
           <p class="description large" id="detailDescription"></p>
+          <dl class="detail-facts">
+            <div>
+              <dt>Status</dt>
+              <dd id="detailStatusText"></dd>
+            </div>
+            <div>
+              <dt>Created</dt>
+              <dd id="detailCreated"></dd>
+            </div>
+          </dl>
 
           <div class="detail-actions">
             <a class="button primary" id="detailMaps" href="#" target="_blank" rel="noreferrer">
               <i data-lucide="map"></i>
               <span>Open Google Maps</span>
             </a>
-            <a class="button secondary" id="detailIssue" href="#" target="_blank" rel="noreferrer">
-              <i data-lucide="github"></i>
-              <span>View Issue</span>
+            <a class="button secondary" id="detailEdit" href="#" hidden>
+              <i data-lucide="pencil"></i>
+              <span>Edit</span>
             </a>
           </div>
 
-          <section class="detail-notes" id="detailNotesWrap" hidden>
-            <p class="eyebrow">Notes</p>
-            <p id="detailNotes"></p>
+          <section class="admin-panel" id="detailAdminPanel" hidden>
+            <button class="button secondary wide-button" id="markVisitedButton" type="button">
+              <i data-lucide="check-circle-2"></i>
+              <span>Mark as Visited</span>
+            </button>
+            <button class="button danger wide-button" id="deletePlaceButton" type="button">
+              <i data-lucide="trash-2"></i>
+              <span>Delete Place</span>
+            </button>
           </section>
         </section>
       </article>
     </main>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/details.js"></script>

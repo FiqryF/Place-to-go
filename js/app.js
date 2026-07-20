@@ -2,8 +2,11 @@
   const state = {
     places: [],
     filter: "all",
-    query: ""
+    query: "",
+    expanded: false
   };
+
+  const previewLimit = 6;
 
   const els = {
     total: document.getElementById("totalCount"),
@@ -15,29 +18,30 @@
     chips: Array.from(document.querySelectorAll(".filter-chip")),
     listTitle: document.getElementById("listTitle"),
     status: document.getElementById("statusMessage"),
-    add: document.getElementById("addPlaceButton"),
     refresh: document.getElementById("refreshButton"),
-    mapOverview: document.getElementById("mapOverviewLink")
+    seeAll: document.getElementById("seeAllButton")
   };
 
   function init() {
-    const links = window.PlaceToGoData.getRepoLinks();
-    els.add.href = "add.html";
-    els.mapOverview.href = window.PLACE_TO_GO_CONFIG.mapsOverviewUrl || "https://www.google.com/maps";
-
     els.search.addEventListener("input", (event) => {
       state.query = event.target.value.trim().toLowerCase();
+      state.expanded = false;
       render();
     });
 
     els.chips.forEach((chip) => {
       chip.addEventListener("click", () => {
         state.filter = chip.dataset.filter;
+        state.expanded = false;
         render();
       });
     });
 
     els.refresh.addEventListener("click", loadPlaces);
+    els.seeAll.addEventListener("click", () => {
+      state.expanded = true;
+      render();
+    });
     loadPlaces();
   }
 
@@ -48,7 +52,7 @@
       hideStatus();
     } catch (error) {
       state.places = window.PlaceToGoData.samplePlaces;
-      showStatus("Could not reach GitHub Issues, so sample places are shown for now. Check js/config.js after publishing.");
+      showStatus("Could not reach Supabase, so sample places are shown for now. Check js/config.js and your Supabase policies.");
     }
     render();
   }
@@ -86,7 +90,9 @@
 
   function renderList() {
     const visiblePlaces = getVisiblePlaces();
+    const placesToRender = state.expanded ? visiblePlaces : visiblePlaces.slice(0, previewLimit);
     els.list.innerHTML = "";
+    els.seeAll.hidden = true;
 
     if (!visiblePlaces.length) {
       const empty = document.createElement("section");
@@ -96,7 +102,7 @@
       return;
     }
 
-    visiblePlaces.forEach((place) => {
+    placesToRender.forEach((place) => {
       const card = els.template.content.firstElementChild.cloneNode(true);
       const coverLink = card.querySelector(".cover-link");
       const image = card.querySelector(".place-cover");
@@ -122,6 +128,13 @@
       detail.href = detailUrl;
       els.list.appendChild(card);
     });
+
+    if (visiblePlaces.length > previewLimit && !state.expanded) {
+      const remaining = visiblePlaces.length - previewLimit;
+      els.seeAll.hidden = false;
+      els.seeAll.querySelector("span").textContent = `See all ${visiblePlaces.length} places`;
+      els.seeAll.setAttribute("aria-label", `Show ${remaining} more places`);
+    }
   }
 
   function showStatus(message) {
