@@ -29,6 +29,9 @@ create table public.places (
   image_url text,
   status text not null default 'wishlist' check (status in ('wishlist', 'visited')),
   target_date date,
+  visited_at date,
+  fiqry_rating integer check (fiqry_rating between 1 and 5),
+  isyana_rating integer check (isyana_rating between 1 and 5),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -43,18 +46,18 @@ create policy "Anyone can read places"
 on public.places for select
 using (true);
 
-create policy "Authenticated admins can insert places"
+create policy "Authenticated users can insert places"
 on public.places for insert
 to authenticated
 with check (true);
 
-create policy "Authenticated admins can update places"
+create policy "Authenticated users can update places"
 on public.places for update
 to authenticated
 using (true)
 with check (true);
 
-create policy "Authenticated admins can delete places"
+create policy "Authenticated users can delete places"
 on public.places for delete
 to authenticated
 using (true);
@@ -64,8 +67,10 @@ For Storage, allow public reads and authenticated uploads to the `place-images` 
 
 ## Pages
 
-- `index.html`: public home, search, filters, cards, statistics
-- `details.html`: public detail page, admin controls when logged in
+- `index.html`: welcome screen before login
+- `home.html`: logged-in user home with wishlist/search/filter cards
+- `details.html`: logged-in detail page with visited date and Fiqry/Isyana ratings
 - `login.html`: Supabase Auth login
-- `admin.html`: admin dashboard after login
-- `add.html`: admin add/edit form with image upload
+- `manage.html`: logged-in create/edit/delete page
+- `add.html`: logged-in add/edit form with image upload
+- Logged-in users can mark wishlist places as visited through a restricted Supabase RPC.

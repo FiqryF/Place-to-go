@@ -1,7 +1,7 @@
 (function () {
   const state = {
     places: [],
-    filter: "all",
+    filter: "wishlist",
     query: "",
     expanded: false
   };
@@ -19,10 +19,21 @@
     listTitle: document.getElementById("listTitle"),
     status: document.getElementById("statusMessage"),
     refresh: document.getElementById("refreshButton"),
-    seeAll: document.getElementById("seeAllButton")
+    seeAll: document.getElementById("seeAllButton"),
+    menu: document.getElementById("userMenu"),
+    logout: document.getElementById("logoutButton"),
+    logoutDialog: document.getElementById("logoutDialog"),
+    cancelLogout: document.getElementById("cancelLogoutButton"),
+    confirmLogout: document.getElementById("confirmLogoutButton")
   };
 
-  function init() {
+  async function init() {
+    const session = await window.PlaceToGoData.getSession();
+    if (!session) {
+      window.location.replace("login.html?next=home.html");
+      return;
+    }
+
     els.search.addEventListener("input", (event) => {
       state.query = event.target.value.trim().toLowerCase();
       state.expanded = false;
@@ -42,7 +53,38 @@
       state.expanded = true;
       render();
     });
+    els.logout.addEventListener("click", openLogoutDialog);
+    els.cancelLogout.addEventListener("click", closeLogoutDialog);
+    els.confirmLogout.addEventListener("click", logout);
     loadPlaces();
+  }
+
+  function closeMenu() {
+    els.menu.open = false;
+  }
+
+  function openLogoutDialog() {
+    closeMenu();
+    els.logoutDialog.hidden = false;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeLogoutDialog() {
+    els.logoutDialog.hidden = true;
+  }
+
+  async function logout() {
+    els.confirmLogout.disabled = true;
+    try {
+      await window.PlaceToGoData.signOut();
+      closeLogoutDialog();
+      state.places = [];
+      window.location.href = "index.html";
+    } catch (error) {
+      showStatus(error.message || "Logout failed. Please try again.");
+    } finally {
+      els.confirmLogout.disabled = false;
+    }
   }
 
   async function loadPlaces() {
@@ -85,7 +127,7 @@
       wishlist: "Wishlist",
       visited: "Visited"
     };
-    els.listTitle.textContent = labels[state.filter] || "All places";
+    els.listTitle.textContent = labels[state.filter] || "Wishlist";
   }
 
   function renderList() {

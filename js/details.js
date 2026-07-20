@@ -10,16 +10,32 @@
     description: document.getElementById("detailDescription"),
     statusText: document.getElementById("detailStatusText"),
     created: document.getElementById("detailCreated"),
+    visitFacts: document.getElementById("visitFacts"),
+    visitedDate: document.getElementById("detailVisitedDate"),
+    ratings: document.getElementById("detailRatings"),
     maps: document.getElementById("detailMaps"),
-    edit: document.getElementById("detailEdit"),
-    adminPanel: document.getElementById("detailAdminPanel"),
-    markVisited: document.getElementById("markVisitedButton"),
-    deletePlace: document.getElementById("deletePlaceButton")
+    visited: document.getElementById("detailVisitedButton"),
+    visitSheet: document.getElementById("visitSheet"),
+    visitSheetBackdrop: document.getElementById("visitSheetBackdrop"),
+    visitForm: document.getElementById("visitForm"),
+    visitedDateInput: document.getElementById("visitedDateInput"),
+    ratingPickers: Array.from(document.querySelectorAll(".rating-picker")),
+    cancelVisit: document.getElementById("cancelVisitButton"),
+    saveVisit: document.getElementById("saveVisitButton"),
+    celebration: document.getElementById("visitedCelebration"),
+    celebrationName: document.getElementById("celebrationPlaceName")
   };
 
   let currentPlace = null;
+  const selectedRatings = {
+    fiqry: 0,
+    isyana: 0
+  };
 
   async function init() {
+    const user = await window.PlaceToGoData.requireUser();
+    if (!user) return;
+
     showStatus("Loading place...");
     try {
       const id = new URLSearchParams(window.location.search).get("id");
@@ -30,13 +46,19 @@
       }
       render(currentPlace);
       hideStatus();
-      await renderAdminControls();
     } catch (error) {
       showStatus(error.message || "Could not load this place.");
     }
 
-    els.markVisited.addEventListener("click", markAsVisited);
-    els.deletePlace.addEventListener("click", removePlace);
+    els.visited.addEventListener("click", openVisitForm);
+    els.visitForm.addEventListener("submit", markVisited);
+    els.visitSheetBackdrop.addEventListener("click", closeVisitForm);
+    els.cancelVisit.addEventListener("click", closeVisitForm);
+    els.ratingPickers.forEach((picker) => {
+      picker.querySelectorAll("[data-rating]").forEach((button) => {
+        button.addEventListener("click", () => selectRating(picker, button));
+      });
+    });
 
     if (window.lucide) window.lucide.createIcons();
   }
@@ -55,41 +77,89 @@
     els.statusText.textContent = place.status === "visited" ? "Visited" : "Wishlist";
     els.created.textContent = formatDate(place.createdAt);
     els.maps.href = place.mapsUrl;
-    els.edit.href = `add.html?id=${encodeURIComponent(place.id)}`;
-    els.markVisited.hidden = place.status === "visited";
+    els.visited.hidden = place.status === "visited";
+    closeVisitForm();
+
+    const hasVisitDetails = place.status === "visited" && (place.visitedAt || place.fiqryRating || place.isyanaRating);
+    els.visitFacts.hidden = !hasVisitDetails;
+    els.visitedDate.textContent = formatDate(place.visitedAt);
+    els.ratings.textContent = formatRatings(place);
   }
 
-  async function renderAdminControls() {
-    const user = await window.PlaceToGoData.getCurrentUser();
-    els.edit.hidden = !user;
-    els.adminPanel.hidden = !user;
+  function openVisitForm() {
+    selectedRatings.fiqry = 0;
+    selectedRatings.isyana = 0;
+    els.ratingPickers.forEach((picker) => {
+      picker.querySelectorAll("[data-rating]").forEach((button) => button.classList.remove("selected"));
+    });
+    els.saveVisit.disabled = false;
+    els.visitedDateInput.value = new Date().toISOString().slice(0, 10);
+    els.visitSheet.hidden = false;
+    window.requestAnimationFrame(() => {
+      els.visitSheet.classList.add("show");
+    });
   }
 
-  async function markAsVisited() {
+  function closeVisitForm() {
+    if (!els.visitSheet || els.visitSheet.hidden) return;
+    els.visitSheet.classList.remove("show");
+    window.setTimeout(() => {
+      els.visitSheet.hidden = true;
+    }, 220);
+  }
+
+  function selectRating(picker, selectedButton) {
+    const person = picker.dataset.person;
+    selectedRatings[person] = Number(selectedButton.dataset.rating);
+    picker.querySelectorAll("[data-rating]").forEach((button) => {
+      button.classList.toggle("selected", Number(button.dataset.rating) <= selectedRatings[person]);
+    });
+  }
+
+  async function markVisited(event) {
+    event.preventDefault();
     if (!currentPlace) return;
-    showStatus("Updating status...");
+    els.saveVisit.disabled = true;
+    showStatus("Updating visited status...");
+
     try {
-      currentPlace = await window.PlaceToGoData.updateStatus(currentPlace.id, "visited");
+      if (!selectedRatings.fiqry || !selectedRatings.isyana) {
+        throw new Error("Pilih rating Fiqry dan Isyana dulu.");
+      }
+
+      currentPlace = await window.PlaceToGoData.markPlaceVisited(currentPlace.id, {
+        visited_at: els.visitedDateInput.value,
+        fiqry_rating: selectedRatings.fiqry,
+        isyana_rating: selectedRatings.isyana
+      });
       render(currentPlace);
+      showVisitedCelebration(currentPlace);
       hideStatus();
       if (window.lucide) window.lucide.createIcons();
     } catch (error) {
-      showStatus(error.message || "Could not update status.");
+      els.saveVisit.disabled = false;
+      els.visited.hidden = false;
+      els.visitForm.hidden = false;
+      showStatus(error.message || "Could not mark this place as visited.");
     }
   }
 
-  async function removePlace() {
-    if (!currentPlace) return;
-    const confirmed = window.confirm(`Delete ${currentPlace.title}?`);
-    if (!confirmed) return;
+  function showVisitedCelebration(place) {
+    els.celebrationName.textContent = place.title;
+    els.celebration.hidden = false;
+    els.celebration.classList.remove("show");
 
-    showStatus("Deleting place...");
-    try {
-      await window.PlaceToGoData.deletePlace(currentPlace.id);
-      window.location.href = "index.html";
-    } catch (error) {
-      showStatus(error.message || "Could not delete this place.");
-    }
+    window.requestAnimationFrame(() => {
+      els.celebration.classList.add("show");
+      if (window.lucide) window.lucide.createIcons();
+    });
+
+    window.setTimeout(() => {
+      els.celebration.classList.remove("show");
+      window.setTimeout(() => {
+        els.celebration.hidden = true;
+      }, 240);
+    }, 3200);
   }
 
   function formatDate(value) {
@@ -99,6 +169,12 @@
       month: "short",
       year: "numeric"
     }).format(new Date(value));
+  }
+
+  function formatRatings(place) {
+    const fiqry = place.fiqryRating ? `Fiqry ${place.fiqryRating}/5` : "Fiqry -";
+    const isyana = place.isyanaRating ? `Isyana ${place.isyanaRating}/5` : "Isyana -";
+    return `${fiqry}, ${isyana}`;
   }
 
   function showStatus(message) {

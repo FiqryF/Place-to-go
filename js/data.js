@@ -103,6 +103,9 @@
       imageUrl,
       image_url: imageUrl,
       targetDate: row.target_date || row.targetDate || "",
+      visitedAt: row.visited_at || row.visitedAt || "",
+      fiqryRating: row.fiqry_rating || row.fiqryRating || "",
+      isyanaRating: row.isyana_rating || row.isyanaRating || "",
       createdAt: row.created_at || row.createdAt || "",
       updatedAt: row.updated_at || row.updatedAt || ""
     };
@@ -155,6 +158,14 @@
     return data.user || null;
   }
 
+  async function getSession() {
+    const client = getClient();
+    if (!client) return null;
+    const { data, error } = await client.auth.getSession();
+    if (error) return null;
+    return data.session || null;
+  }
+
   async function signIn(email, password) {
     const client = getClient();
     if (!client) throw new Error("Supabase is not configured yet.");
@@ -170,14 +181,14 @@
     if (error) throw error;
   }
 
-  async function requireAdmin() {
-    const user = await getCurrentUser();
-    if (!user) {
+  async function requireUser() {
+    const session = await getSession();
+    if (!session || !session.user) {
       const next = encodeURIComponent(`${window.location.pathname.split("/").pop() || "index.html"}${window.location.search}`);
-      window.location.href = `login.html?next=${next}`;
+      window.location.replace(`login.html?next=${next}`);
       return null;
     }
-    return user;
+    return session.user;
   }
 
   async function uploadImage(file) {
@@ -240,6 +251,21 @@
     return normalizePlace(data);
   }
 
+  async function markPlaceVisited(id, visitDetails) {
+    const client = getClient();
+    if (!client) throw new Error("Supabase is not configured yet.");
+
+    const { data, error } = await client.rpc("mark_place_visited", {
+      place_id: id,
+      visited_date: visitDetails.visited_at,
+      bf_score: visitDetails.fiqry_rating,
+      gf_score: visitDetails.isyana_rating
+    });
+
+    if (error) throw error;
+    return normalizePlace(Array.isArray(data) ? data[0] : data);
+  }
+
   async function deletePlace(id) {
     const client = getClient();
     if (!client) throw new Error("Supabase is not configured yet.");
@@ -251,13 +277,16 @@
     fetchPlaces,
     fetchPlace,
     findPlaceById,
+    getClient,
     getCurrentUser,
+    getSession,
     isSupabaseConfigured,
-    requireAdmin,
+    requireUser,
     savePlace,
     signIn,
     signOut,
     updateStatus,
+    markPlaceVisited,
     deletePlace,
     samplePlaces
   };

@@ -7,7 +7,6 @@
     title: document.getElementById("formTitle"),
     status: document.getElementById("addStatus"),
     save: document.getElementById("savePlaceButton"),
-    logout: document.getElementById("logoutButton"),
     name: document.getElementById("nameInput"),
     location: document.getElementById("locationInput"),
     category: document.getElementById("categoryInput"),
@@ -26,7 +25,7 @@
       return;
     }
 
-    const user = await window.PlaceToGoData.requireAdmin();
+    const user = await window.PlaceToGoData.requireUser();
     if (!user) return;
 
     if (editingId) {
@@ -36,7 +35,6 @@
     }
 
     els.form.addEventListener("submit", savePlace);
-    els.logout.addEventListener("click", logout);
 
     if (window.lucide) window.lucide.createIcons();
   }
@@ -86,11 +84,6 @@
       showStatus(error.message || "Could not save this place.");
       els.save.disabled = false;
     }
-  }
-
-  async function logout() {
-    await window.PlaceToGoData.signOut();
-    window.location.href = "index.html";
   }
 
   function showStatus(message) {
