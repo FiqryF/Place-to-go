@@ -58,6 +58,11 @@
   ];
 
   let cachedClient = null;
+  const authTimeoutMs = 30 * 60 * 1000;
+  const rememberKey = "placeToGoRememberMe";
+  const activeSessionKey = "placeToGoSessionActive";
+  const lastActiveKey = "placeToGoLastActiveAt";
+  let authTrackingStarted = false;
 
   function getConfig() {
     return window.PLACE_TO_GO_CONFIG || {};
@@ -159,32 +164,101 @@
     return data.user || null;
   }
 
+  function getRememberEnabled() {
+    return localStorage.getItem(rememberKey) === "true";
+  }
+
+  function getAuthStorage() {
+    return getRememberEnabled() ? localStorage : sessionStorage;
+  }
+
+  function setAuthState(remember) {
+    localStorage.setItem(rememberKey, remember ? "true" : "false");
+    sessionStorage.setItem(activeSessionKey, "true");
+    localStorage.removeItem(lastActiveKey);
+    sessionStorage.removeItem(lastActiveKey);
+    getAuthStorage().setItem(lastActiveKey, String(Date.now()));
+  }
+
+  function clearAuthState() {
+    localStorage.removeItem(rememberKey);
+    localStorage.removeItem(lastActiveKey);
+    sessionStorage.removeItem(activeSessionKey);
+    sessionStorage.removeItem(lastActiveKey);
+  }
+
+  function touchAuthSession() {
+    const hasKnownSession = getRememberEnabled() || sessionStorage.getItem(activeSessionKey) === "true";
+    if (!hasKnownSession) return;
+    getAuthStorage().setItem(lastActiveKey, String(Date.now()));
+  }
+
+  function isSessionExpired() {
+    if (!getRememberEnabled() && sessionStorage.getItem(activeSessionKey) !== "true") return true;
+
+    const lastActiveAt = Number(getAuthStorage().getItem(lastActiveKey) || 0);
+    if (!lastActiveAt) return true;
+    return Date.now() - lastActiveAt > authTimeoutMs;
+  }
+
+  function startAuthTracking() {
+    if (authTrackingStarted) return;
+    authTrackingStarted = true;
+
+    let lastTouch = 0;
+    const handleActivity = () => {
+      const now = Date.now();
+      if (now - lastTouch < 30000) return;
+      lastTouch = now;
+      touchAuthSession();
+    };
+
+    ["click", "keydown", "touchstart", "scroll"].forEach((eventName) => {
+      window.addEventListener(eventName, handleActivity, { passive: true });
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") touchAuthSession();
+    });
+  }
+
   async function getSession() {
     const client = getClient();
     if (!client) return null;
     const { data, error } = await client.auth.getSession();
     if (error) return null;
+    if (data.session && isSessionExpired()) {
+      await signOut();
+      return null;
+    }
+    if (data.session) {
+      touchAuthSession();
+      startAuthTracking();
+    }
     return data.session || null;
   }
 
-  async function signIn(email, password) {
+  async function signIn(email, password, options = {}) {
     const client = getClient();
     if (!client) throw new Error("Supabase is not configured yet.");
     const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    setAuthState(Boolean(options.remember));
+    startAuthTracking();
     return data.user;
   }
 
   async function signOut() {
     const client = getClient();
+    clearAuthState();
     if (!client) return;
-    const { error } = await client.auth.signOut();
+    const { error } = await client.auth.signOut({ scope: "local" });
     if (error) throw error;
   }
 
   async function requireUser() {
     const session = await getSession();
-    if (!session || !session.user) {
+    if (!session?.user) {
       const next = encodeURIComponent(`${window.location.pathname.split("/").pop() || "index.html"}${window.location.search}`);
       window.location.replace(`login.html?next=${next}`);
       return null;
@@ -193,7 +267,7 @@
   }
 
   async function uploadImage(file) {
-    if (!file || !file.size) return "";
+    if (!file?.size) return "";
     const client = getClient();
     if (!client) throw new Error("Supabase is not configured yet.");
 

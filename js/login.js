@@ -22,9 +22,10 @@
       form.querySelector("button[type='submit']").disabled = true;
       const email = document.getElementById("emailInput").value.trim();
       const password = document.getElementById("passwordInput").value;
+      const remember = Boolean(form.elements.remember?.checked);
 
       try {
-        await window.PlaceToGoData.signIn(email, password);
+        await window.PlaceToGoData.signIn(email, password, { remember });
         showStatus("Anda berhasil login.", "success");
         window.setTimeout(goNext, 900);
       } catch (error) {
