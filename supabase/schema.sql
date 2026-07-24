@@ -13,6 +13,8 @@ create table if not exists public.places (
   visited_at date,
   fiqry_rating integer check (fiqry_rating between 1 and 5),
   isyana_rating integer check (isyana_rating between 1 and 5),
+  fiqry_note text,
+  isyana_note text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -25,6 +27,12 @@ add column if not exists fiqry_rating integer check (fiqry_rating between 1 and 
 
 alter table public.places
 add column if not exists isyana_rating integer check (isyana_rating between 1 and 5);
+
+alter table public.places
+add column if not exists fiqry_note text;
+
+alter table public.places
+add column if not exists isyana_note text;
 
 alter table public.places enable row level security;
 
@@ -62,12 +70,16 @@ using (true);
 
 drop function if exists public.mark_place_visited(uuid);
 drop function if exists public.mark_place_visited(uuid, date, integer, integer);
+drop function if exists public.mark_place_visited(uuid, date, integer, integer, text, text);
+drop function if exists public.save_place_review(uuid, date, text, integer, text);
 
 create or replace function public.mark_place_visited(
   place_id uuid,
   visited_date date,
   bf_score integer,
-  gf_score integer
+  gf_score integer,
+  bf_note text default '',
+  gf_note text default ''
 )
 returns public.places
 language plpgsql
@@ -95,9 +107,10 @@ begin
     visited_at = visited_date,
     fiqry_rating = bf_score,
     isyana_rating = gf_score,
+    fiqry_note = nullif(trim(bf_note), ''),
+    isyana_note = nullif(trim(gf_note), ''),
     updated_at = now()
   where id = place_id
-    and status = 'wishlist'
   returning * into updated_place;
 
   if updated_place.id is null then
@@ -110,8 +123,54 @@ begin
 end;
 $$;
 
-revoke all on function public.mark_place_visited(uuid, date, integer, integer) from public;
-grant execute on function public.mark_place_visited(uuid, date, integer, integer) to authenticated;
+revoke all on function public.mark_place_visited(uuid, date, integer, integer, text, text) from public;
+grant execute on function public.mark_place_visited(uuid, date, integer, integer, text, text) to authenticated;
+
+create or replace function public.save_place_review(
+  place_id uuid,
+  visited_date date,
+  reviewer_name text,
+  reviewer_score integer,
+  reviewer_note text default ''
+)
+returns public.places
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  updated_place public.places;
+begin
+  if visited_date is null then
+    raise exception 'Visited date is required';
+  end if;
+
+  if reviewer_name not in ('fiqry', 'isyana') then
+    raise exception 'Reviewer must be fiqry or isyana';
+  end if;
+
+  if reviewer_score is null or reviewer_score < 1 or reviewer_score > 5 then
+    raise exception 'Rating must be between 1 and 5';
+  end if;
+
+  update public.places
+  set
+    status = 'visited',
+    visited_at = coalesce(public.places.visited_at, visited_date),
+    fiqry_rating = case when reviewer_name = 'fiqry' then reviewer_score else fiqry_rating end,
+    isyana_rating = case when reviewer_name = 'isyana' then reviewer_score else isyana_rating end,
+    fiqry_note = case when reviewer_name = 'fiqry' then nullif(trim(reviewer_note), '') else fiqry_note end,
+    isyana_note = case when reviewer_name = 'isyana' then nullif(trim(reviewer_note), '') else isyana_note end,
+    updated_at = now()
+  where id = place_id
+  returning * into updated_place;
+
+  return updated_place;
+end;
+$$;
+
+revoke all on function public.save_place_review(uuid, date, text, integer, text) from public;
+grant execute on function public.save_place_review(uuid, date, text, integer, text) to authenticated;
 
 insert into storage.buckets (id, name, public)
 values ('place-images', 'place-images', true)

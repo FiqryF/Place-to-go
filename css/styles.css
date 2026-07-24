@@ -1484,10 +1484,17 @@ p {
   resize: vertical;
 }
 
+.visit-form textarea {
+  min-height: 86px;
+  padding: 13px 14px;
+  resize: vertical;
+}
+
 .place-form input:focus,
 .place-form select:focus,
 .place-form textarea:focus,
-.visit-form input:focus {
+.visit-form input:focus,
+.visit-form textarea:focus {
   border-color: rgba(47, 128, 237, 0.42);
   box-shadow: 0 0 0 4px rgba(72, 169, 239, 0.18);
 }
@@ -2090,11 +2097,55 @@ p {
   box-shadow: 0 12px 22px rgba(16, 21, 34, 0.14);
 }
 
-.detail-page .status-message {
-  margin: 0 16px 12px;
-  border: 0;
-  border-radius: 24px;
-  box-shadow: 0 14px 28px rgba(18, 103, 223, 0.16);
+.detail-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: min(calc(100% - 32px), 390px);
+  min-height: 54px;
+  padding: 10px 13px;
+  border: 1px solid rgba(72, 169, 239, 0.26);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  box-shadow: 0 18px 38px rgba(16, 21, 34, 0.18);
+  transform: translateX(-50%);
+  animation: toastIn 190ms ease both;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.detail-toast.success {
+  border-color: rgba(72, 169, 239, 0.3);
+  background: rgba(232, 246, 255, 0.98);
+  color: #1565d8;
+}
+
+.detail-toast.error {
+  border-color: rgba(255, 90, 95, 0.3);
+  background: rgba(255, 240, 241, 0.98);
+  color: var(--red);
+}
+
+.toast-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--butter);
+  color: var(--ink);
+}
+
+.toast-icon svg {
+  width: 17px;
+  height: 17px;
 }
 
 .detail-view {
@@ -2342,24 +2393,37 @@ p {
 
 .mood-card {
   position: relative;
-  min-height: 124px;
-  padding: 13px 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 132px;
+  padding: 12px;
   overflow: hidden;
   border: 2px solid #d9efff;
-  border-radius: 24px;
-  background: var(--white);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 252, 255, 0.96)),
+    var(--white);
   box-shadow: 0 12px 22px rgba(18, 103, 223, 0.1);
 }
 
 .mood-card::after {
   content: "";
   position: absolute;
-  right: -18px;
-  bottom: -20px;
-  width: 70px;
-  height: 70px;
+  right: -22px;
+  bottom: -26px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   background: #dff2ff;
+}
+
+.mood-card-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .mood-icon {
@@ -2367,12 +2431,12 @@ p {
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  margin-bottom: 10px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--butter);
   color: var(--ink);
+  box-shadow: 0 8px 16px rgba(255, 210, 64, 0.22);
 }
 
 .mood-icon svg {
@@ -2382,13 +2446,14 @@ p {
 
 .mood-card p,
 .mood-card h3,
-.mood-card span:last-child {
+.mood-card span,
+.mood-card small {
   position: relative;
   z-index: 1;
 }
 
 .mood-card p {
-  margin: 0 0 4px;
+  margin: 0;
   color: var(--sky);
   font-size: 10px;
   font-weight: 800;
@@ -2396,26 +2461,55 @@ p {
 }
 
 .mood-card h3 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: var(--ink);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.15;
 }
 
-.mood-card span:last-child {
+.mood-score {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--muted);
-  font-size: 11px;
+  width: max-content;
+  max-width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid rgba(246, 181, 29, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 248, 207, 0.88);
+  color: #745200;
+  font-size: 12px;
   font-weight: 800;
 }
 
-.mood-card span:last-child svg {
+.mood-score svg {
   width: 13px;
   height: 13px;
   color: #f6b51d;
   fill: currentColor;
+}
+
+.mood-card small {
+  display: block;
+  margin-top: 10px;
+  padding: 9px 10px;
+  border: 1px solid #d9efff;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #5f728d;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.mood-card small strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--sky);
+  font-size: 9px;
+  text-transform: uppercase;
 }
 
 .visit-sheet,
@@ -2453,8 +2547,11 @@ p {
   position: relative;
   z-index: 1;
   width: min(100%, 430px);
+  max-height: min(86vh, 760px);
   margin: 0 auto;
   padding: 16px 16px 20px;
+  overflow-y: auto;
+  scrollbar-width: none;
   border-radius: 30px 30px 0 0;
   background:
     repeating-linear-gradient(110deg, rgba(72, 169, 239, 0.08) 0 1px, transparent 1px 34px),
@@ -2484,6 +2581,10 @@ p {
 
 .visit-date-field {
   position: relative;
+}
+
+.sheet-panel::-webkit-scrollbar {
+  display: none;
 }
 
 .visit-date-field input {
@@ -2524,6 +2625,24 @@ p {
   background: rgba(255, 255, 255, 0.86);
 }
 
+.sheet-status {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 90, 95, 0.26);
+  border-radius: 14px;
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.sheet-status.success {
+  border-color: rgba(72, 169, 239, 0.3);
+  background: var(--sky-soft);
+  color: var(--sky);
+}
+
 .rating-picker legend {
   padding: 0 6px;
   color: var(--sky);
@@ -2558,11 +2677,47 @@ p {
   transform: translateY(-2px) scale(1.08);
 }
 
+.review-field {
+  margin-top: 8px;
+}
+
+.review-field span {
+  color: var(--sky);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.review-field textarea {
+  width: 100%;
+  min-height: 68px;
+  padding: 11px 12px;
+  border: 1px solid #d9efff;
+  border-radius: 14px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  resize: vertical;
+}
+
+.reviewer-save {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 10px;
+  border-radius: 14px;
+}
+
 .sheet-actions,
 .confirm-actions {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
   gap: 10px;
+}
+
+.visit-sheet .sheet-actions {
+  grid-template-columns: 1fr;
 }
 
 .sheet-actions .button,
@@ -2841,6 +2996,11 @@ p {
 @keyframes dialogIn {
   from { transform: translateY(8px) scale(0.98); opacity: 0; }
   to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, -8px) scale(0.98); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes celebrateCard {

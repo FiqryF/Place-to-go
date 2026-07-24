@@ -112,6 +112,8 @@
       visitedAt: row.visited_at || row.visitedAt || "",
       fiqryRating: row.bf_score || row.fiqry_rating || row.fiqryRating || "",
       isyanaRating: row.gf_score || row.isyana_rating || row.isyanaRating || "",
+      fiqryNote: row.bf_note || row.fiqry_note || row.fiqryNote || "",
+      isyanaNote: row.gf_note || row.isyana_note || row.isyanaNote || "",
       createdAt: row.created_at || row.createdAt || "",
       updatedAt: row.updated_at || row.updatedAt || ""
     };
@@ -334,10 +336,58 @@
       place_id: id,
       visited_date: visitDetails.visited_at,
       bf_score: visitDetails.fiqry_rating,
-      gf_score: visitDetails.isyana_rating
+      gf_score: visitDetails.isyana_rating,
+      bf_note: visitDetails.fiqry_note || "",
+      gf_note: visitDetails.isyana_note || ""
     });
 
     if (error) throw error;
+    return normalizePlace(Array.isArray(data) ? data[0] : data);
+  }
+
+  async function savePlaceReview(id, reviewDetails) {
+    const client = getClient();
+    if (!client) throw new Error("Supabase is not configured yet.");
+
+    const { data, error } = await client.rpc("save_place_review", {
+      place_id: id,
+      visited_date: reviewDetails.visited_at,
+      reviewer_name: reviewDetails.reviewer,
+      reviewer_score: reviewDetails.rating,
+      reviewer_note: reviewDetails.note || ""
+    });
+
+    if (error) {
+      const message = String(error.message || "").toLowerCase();
+      const isMissingRpc = message.includes("save_place_review") || message.includes("function");
+      if (!isMissingRpc) throw error;
+
+      const reviewer = reviewDetails.reviewer;
+      const row = {
+        status: "visited",
+        updated_at: new Date().toISOString()
+      };
+
+      if (reviewDetails.visited_at) row.visited_at = reviewDetails.visited_at;
+      if (reviewer === "fiqry") {
+        row.fiqry_rating = reviewDetails.rating;
+        row.fiqry_note = reviewDetails.note || null;
+      }
+      if (reviewer === "isyana") {
+        row.isyana_rating = reviewDetails.rating;
+        row.isyana_note = reviewDetails.note || null;
+      }
+
+      const fallback = await client
+        .from("places")
+        .update(row)
+        .eq("id", id)
+        .select("*")
+        .single();
+
+      if (fallback.error) throw fallback.error;
+      return normalizePlace(fallback.data);
+    }
     return normalizePlace(Array.isArray(data) ? data[0] : data);
   }
 
@@ -362,6 +412,7 @@
     signOut,
     updateStatus,
     markPlaceVisited,
+    savePlaceReview,
     deletePlace,
     samplePlaces
   };

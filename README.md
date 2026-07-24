@@ -32,6 +32,8 @@ create table public.places (
   visited_at date,
   fiqry_rating integer check (fiqry_rating between 1 and 5),
   isyana_rating integer check (isyana_rating between 1 and 5),
+  fiqry_note text,
+  isyana_note text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -69,7 +71,7 @@ For Storage, allow public reads and authenticated uploads to the `place-images` 
 
 - `index.html`: welcome screen before login
 - `home.html`: logged-in user home with wishlist/search/filter cards
-- `details.html`: logged-in detail page with visited date and Fiqry/Isyana ratings
+- `details.html`: logged-in detail page with visited date, Fiqry/Isyana ratings, and personal notes
 - `login.html`: Supabase Auth login
 - `manage.html`: logged-in create/edit/delete page
 - `add.html`: logged-in add/edit form with image upload
